@@ -2,6 +2,8 @@
 
 namespace Paragraf\ViberBot;
 
+use Illuminate\Support\Facades\Log;
+use Paragraf\ViberBot\Event\MessageEvent;
 use Paragraf\ViberBot\Http\Http;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
@@ -118,8 +120,12 @@ class Bot
     {
         if ($this->proceed) {
             if (count($this->replays) === 1) {
-                Http::call('POST', 'send_message', array_merge($this->body, ['text' => $this->replays[0], 'receiver' => $this->event->getUserId()]));
-
+                $body = array_merge($this->body, [
+                    'text' => $this->replays[0],
+                    'receiver' => $this->event->getUserId(),
+                    'min_api_version' => 3
+                ]);
+                $resp = Http::call('POST', 'send_message', $body);
                 $this->replays = [];
 
                 return;
